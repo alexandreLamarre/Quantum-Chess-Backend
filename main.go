@@ -8,6 +8,7 @@ import (
   "github.com/alexandreLamarre/Quantum-Chess-Backend/pkg/quantum"
 )
 
+var RUN bool = false
 
 func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
     fmt.Println("WebSocket Endpoint Hit")
@@ -61,8 +62,9 @@ func setupRoutes() {
 
 func main() {
     fmt.Println("Quantum Chess App v0.01")
-    fmt.Println("Passed quantum tests?")
     fmt.Println(quantum.TestAllQuantum())
     setupRoutes()
-    http.ListenAndServe(":8080", nil)
+    if(RUN) {
+      http.ListenAndServe(":8080", nil)
+    }
 }
