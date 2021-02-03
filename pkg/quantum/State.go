@@ -9,16 +9,16 @@ type QuantumState struct{
 }
 
 func MakeState(qbit_size int) QuantumState{
-  if qbit_size <= 0 {
-    return
-  }
   var res QuantumState
-  size := int(Math.Pow(2,float64(qbit_size)))
+  if qbit_size <= 0 {
+    return res
+  }
+  size := int(math.Pow(2,float64(qbit_size)))
   res.amplitudes = make([]complex128, 0, size)
   return res
 }
 
-func SetState(*q QuantumState, vals []complex128){
+func SetState(q *QuantumState, vals []complex128){
   if(len(q.amplitudes) != len(vals)){return}
 
   for i:= 0; i < len(vals); i++{
