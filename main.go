@@ -8,7 +8,7 @@ import (
   "github.com/alexandreLamarre/Quantum-Chess-Backend/pkg/quantum"
 )
 
-var RUN bool = false
+var RUN bool = true
 
 func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
     fmt.Println("WebSocket Endpoint Hit")
