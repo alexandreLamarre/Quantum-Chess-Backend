@@ -8,7 +8,7 @@ import (
 type Pool struct {
     Register   chan *Client
     Unregister chan *Client
-    Clients    map[*Client]bool
+    Clients    map[*Client]int
     Broadcast  chan Message
 }
 
@@ -16,7 +16,7 @@ func NewPool() *Pool {
     return &Pool{
         Register:   make(chan *Client),
         Unregister: make(chan *Client),
-        Clients:    make(map[*Client]bool),
+        Clients:    make(map[*Client]int),
         Broadcast:  make(chan Message),
     }
 }
@@ -25,21 +25,21 @@ func (pool *Pool) Start() {
     for {
         select {
         case client := <-pool.Register:
-            pool.Clients[client] = true
-            fmt.Println("Size of Connection Pool: ", len(pool.Clients))
+            pool.Clients[client] = 0
+            fmt.Println("Size of Connection Pool: ", len(pool.Clients), "\n")
             for client, _ := range pool.Clients {
                 msg := strconv.Itoa(len(pool.Clients))
                 fmt.Println(msg)
-                client.Conn.WriteJSON(Message{Type: 0, Body: msg})
+                client.Conn.WriteJSON(Message{Type: 0, Players: msg})
             }
             break
         case client := <-pool.Unregister:
             delete(pool.Clients, client)
-            fmt.Println("Size of Connection Pool: ", len(pool.Clients))
+            fmt.Println("Size of Connection Pool: ", len(pool.Clients), "\n")
             for client, _ := range pool.Clients {
               msg := strconv.Itoa(len(pool.Clients))
               fmt.Println(msg);
-              client.Conn.WriteJSON(Message{Type: 0, Body: msg})
+              client.Conn.WriteJSON(Message{Type: 0, Players: msg})
             }
             break
         case message := <-pool.Broadcast:

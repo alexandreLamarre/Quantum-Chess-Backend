@@ -4,7 +4,7 @@ import(
   "fmt"
 )
 
-var DEBUG = true
+var DEBUG = false
 
 func TestAllQuantum() bool {
   if(DEBUG){selectDebug()}
