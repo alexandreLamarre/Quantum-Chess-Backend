@@ -12,7 +12,7 @@ func TestAllQuantum() bool {
   fmt.Println("==== Gates ====\n")
   test:= testGates()
   fmt.Println()
-  fmt.Println("Gates test sucessful?", test)
+  fmt.Println("Gates test successful?", test)
   fmt.Println()
 
   fmt.Println("==== States ==== \n")
