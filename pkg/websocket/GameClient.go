@@ -35,12 +35,12 @@ func (c *GameClient) GameRead() {
     for {
       message := &GameMessage{}
       err := c.Conn.ReadJSON(&message)
-        if err != nil {
-            log.Println(err)
-            return
-        }
-        fmt.Println("\n mesage: \n", message)
-        c.GamePool.Broadcast <- *message
-        fmt.Printf("GAME Message Received: %+v\n", message)
+      if err != nil {
+          log.Println(err)
+          return
+      }
+      fmt.Println("\n mesage: \n", message)
+      c.GamePool.Broadcast <- *message
+      fmt.Printf("GAME Message Received: %+v\n", message)
     }
 }

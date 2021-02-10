@@ -75,22 +75,30 @@ func parseGameURL(url string) (string, string){
 
 func serveList(rooms *websocket.Rooms, w http.ResponseWriter, r *http.Request){
   var ids []string
-  for id, _ := range(rooms.Games){
-    if(rooms.Privacy[id] == false){
-      ids = append(ids, id);
-      fmt.Println(id)
+  var players []string
+  gameInfo := &websocket.GameInfo{Ids: ids, Players: players}
+  for id, game := range rooms.Games{
+    if rooms.Privacy[id] == false{
+      gameInfo.Ids = append(gameInfo.Ids, id)
+      numPlayers := len(game.Clients)
+      if numPlayers > 2 { numPlayers = 2}
+      gameInfo.Players = append(gameInfo.Players, strconv.Itoa(numPlayers))
+      fmt.Println("id", id, "num_players", numPlayers)
     }
   }
   w.Header().Set("Content-Type", "application/json")
-  w.WriteHeader(200);
-  json.NewEncoder(w).Encode(ids)
+  w.WriteHeader(200)
+  err := json.NewEncoder(w).Encode(gameInfo)
+  if err != nil {
+    fmt.Println("Unable to encode json data for serveList")
+  }
 }
 
 
 func serveCreateGame(rooms *websocket.Rooms, w http.ResponseWriter, r *http.Request){
   gid, privacy := parseCreateURL(r.URL.Path)
   fmt.Println("Creating new Game", gid)
-  if(rooms.Games[gid] != nil){
+  if rooms.Games[gid] != nil{
     fmt.Println("Game already exists")
     w.WriteHeader(409)
     return
@@ -105,7 +113,7 @@ func serveCreateGame(rooms *websocket.Rooms, w http.ResponseWriter, r *http.Requ
 func parseCreateURL(url string) (string, bool) {
   s := strings.Split(url, "/")
   privacy, err := strconv.ParseBool(s[3])
-  if(err != nil){
+  if err != nil{
     fmt.Println("Parse bool error", err);
   }
   fmt.Println("created game with privacy", privacy)
@@ -138,7 +146,7 @@ func main() {
     fmt.Println("Quantum Chess App v0.01")
     quantum.TestAllQuantum()
     setupRoutes()
-    if(RUN) {
+    if RUN {
       http.ListenAndServe(":8080", nil)
     }
 }
