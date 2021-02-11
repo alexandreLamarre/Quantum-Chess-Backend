@@ -26,6 +26,10 @@ type InvalidEntanglementDelete int
 // Returns the piece's state space.
 type InvalidMissingState []string
 
+//InvalidDeterminedState is an error returned when a quantum piece is passed in as a mixed state
+// but is actually in a determined state
+type InvalidDeterminedState []string
+
 func (e InvalidMove) Error() string {
 	return fmt.Sprintf("Illegal move to position %d", e)
 }
@@ -39,7 +43,8 @@ func (e InvalidPieceAccess) Error() string {
 }
 
 func (e InvalidAction) Error() string {
-	return fmt.Sprintf("Unrecognized action %s", e)
+	s:= e[:]
+	return fmt.Sprintf("Unrecognized action: %v", s)
 }
 
 func (e InvalidEntanglementDelete) Error() string {
@@ -47,5 +52,11 @@ func (e InvalidEntanglementDelete) Error() string {
 }
 
 func (e InvalidMissingState) Error() string {
-	return fmt.Sprintf("States `%s` are both 0 ", InvalidMissingState{})
+	s:= e[:]
+	return fmt.Sprintf("States `%v` are both 0 ", s)
+}
+
+func (e InvalidDeterminedState) Error() string{
+	s := e[:]
+	return fmt.Sprintf("%v state was passed in as a mixed state", s)
 }
