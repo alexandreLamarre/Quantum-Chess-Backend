@@ -5,6 +5,7 @@ import (
 	"math"
 )
 
+//DEBUG_GATE toggles debug messages for gate functions
 var DEBUG_GATE bool = false
 
 //Gate represents a quantum gate. it factors out the constant in front of a matrix to attempt to reduce calculations.

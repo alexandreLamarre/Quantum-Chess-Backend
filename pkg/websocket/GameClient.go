@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// Client represents a new websocket connection to manage games, with the user's id, and the game pool it is connected to.
+// GameClient represents a new websocket connection to manage games, with the user's id, and the game pool it is connected to.
 type GameClient struct {
 	ID       string
 	Conn     *websocket.Conn

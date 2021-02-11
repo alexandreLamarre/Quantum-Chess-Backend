@@ -13,6 +13,7 @@ type QuantumState struct {
 	Amplitudes []complex128
 }
 
+//MakeState makes a QuantumState of size 2^n where n is qbitSize
 func MakeState(qbitSize int) QuantumState {
 	var res QuantumState
 	if qbitSize <= 0 {
