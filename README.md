@@ -1,4 +1,7 @@
 # Quantum-Chess-Backend
+[![GoReportCard example](https://goreportcard.com/badge/github.com/alexandreLamarre/Quantum-Chess-Backend)](https://goreportcard.com/report/github.com/alexandreLamarre/Quantum-Chess-Backend)
+
+
 Backend for serving quantum chess frontend
 
 Use docker to make a containeraized local environment using:
