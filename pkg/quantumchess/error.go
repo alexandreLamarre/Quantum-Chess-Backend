@@ -43,7 +43,7 @@ func (e InvalidPieceAccess) Error() string {
 }
 
 func (e InvalidAction) Error() string {
-	s:= e[:]
+	s := e[:]
 	return fmt.Sprintf("Unrecognized action: %v", s)
 }
 
@@ -52,11 +52,11 @@ func (e InvalidEntanglementDelete) Error() string {
 }
 
 func (e InvalidMissingState) Error() string {
-	s:= e[:]
+	s := e[:]
 	return fmt.Sprintf("States `%v` are both 0 ", s)
 }
 
-func (e InvalidDeterminedState) Error() string{
+func (e InvalidDeterminedState) Error() string {
 	s := e[:]
 	return fmt.Sprintf("%v state was passed in as a mixed state", s)
 }

@@ -55,10 +55,14 @@ func (piece *Piece) getAction() string {
 	return piece.Action
 }
 
-func (piece *Piece) inMixedState() bool{
-	if len(piece.StateSpace) == 1 {return false}
-	for _,v := range piece.State{
-		if !nonZero(v) { return false}
+func (piece *Piece) inMixedState() bool {
+	if len(piece.StateSpace) == 1 {
+		return false
+	}
+	for _, v := range piece.State {
+		if !nonZero(v) {
+			return false
+		}
 	}
 	return true
 }
@@ -104,29 +108,41 @@ func _getPiecesInAoF(state string, pos int, color int, board *Board) []int {
 	var validSquares []int
 
 	if state == "Pawn" { //when checking this piece is already moved so we dont need to check two squares forward
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking Pawn moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking Pawn moves")
+		}
 		validSquares = checkForward(pos, color, board, validSquares)
 	} else if state == "Knight" {
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking Knight moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking Knight moves")
+		}
 		validSquares = checkKnight(pos, board, validSquares)
 	} else if state == "Bishop" {
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking Bishop moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking Bishop moves")
+		}
 		validSquares = checkBishop(pos, board, validSquares)
 	} else if state == "Rook" {
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking Rook moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking Rook moves")
+		}
 		validSquares = checkRook(pos, board, validSquares)
 	} else if state == "Queen" {
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking Queen moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking Queen moves")
+		}
 		validSquares = checkQueen(pos, board, validSquares)
 	} else if state == "King" {
-		if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println("Checking King moves")}
+		if DEBUG_QUANTUM_CHESS_STRUCTS {
+			fmt.Println("Checking King moves")
+		}
 		validSquares = checkKing(pos, board, validSquares)
 	}
 
 	return validSquares
 }
 
-func checkForward(pos int, color int, board *Board, valid []int) []int{
+func checkForward(pos int, color int, board *Board, valid []int) []int {
 
 	var dx int
 	if color == WHITE {
@@ -144,13 +160,21 @@ func checkForward(pos int, color int, board *Board, valid []int) []int{
 
 func checkBishop(pos int, board *Board, valid []int) []int {
 	valid = checkDiagonal(pos, board, 1, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, -1, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, 1, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, -1, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	return valid
 }
 
@@ -172,22 +196,29 @@ func checkDiagonal(pos int, board *Board, dx int, dy int, valid []int) []int {
 
 	return checkDiagonal(nextPos, board, dx, dy, valid)
 
-
 }
 
-func checkKnight(pos int, board *Board, valid []int) []int{
+func checkKnight(pos int, board *Board, valid []int) []int {
 	valid = checkKnightMove(pos, board, 1, 0, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkKnightMove(pos, board, -1, 0, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkKnightMove(pos, board, 0, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkKnightMove(pos, board, 0, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	return valid
 }
 
-func checkKnightMove(pos int, board *Board, dx int, dy int, valid []int) []int{
+func checkKnightMove(pos int, board *Board, dx int, dy int, valid []int) []int {
 	if dx != 0 {
 		curRow := getRow(pos)
 		directionPos := pos + dx*2
@@ -222,28 +253,35 @@ func checkKnightMove(pos int, board *Board, dx int, dy int, valid []int) []int{
 	return valid
 }
 
-
 func checkRook(pos int, board *Board, valid []int) []int {
 	curRow := getRow(pos)
 	valid = checkHorizontal(pos, curRow, board, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
-	valid = checkHorizontal(pos, curRow,board, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
+	valid = checkHorizontal(pos, curRow, board, 1, valid)
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkVertical(pos, board, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkVertical(pos, board, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	return valid
 }
 
 //dx -1 : left, dx: +1 right
-func checkHorizontal(pos int, curRow int, board *Board, dx int, valid []int) []int{
+func checkHorizontal(pos int, curRow int, board *Board, dx int, valid []int) []int {
 
 	nextPos := pos + dx
 	if !inBoard(nextPos) || getRow(nextPos) != curRow {
 		return valid
-	}else if board.getID(nextPos) != 0 {
-		valid = append(valid,nextPos)
+	} else if board.getID(nextPos) != 0 {
+		valid = append(valid, nextPos)
 		return valid
 	}
 	return checkHorizontal(nextPos, curRow, board, dx, valid)
@@ -265,22 +303,38 @@ func checkVertical(pos int, board *Board, dy int, valid []int) []int {
 func checkQueen(pos int, board *Board, valid []int) []int {
 	curRow := getRow(pos)
 	valid = checkDiagonal(pos, board, 1, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, -1, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, 1, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkDiagonal(pos, board, -1, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 
 	valid = checkHorizontal(pos, curRow, board, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkHorizontal(pos, curRow, board, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkVertical(pos, board, -1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	valid = checkVertical(pos, board, 1, valid)
-	if DEBUG_QUANTUM_CHESS_STRUCTS {fmt.Println(valid)}
+	if DEBUG_QUANTUM_CHESS_STRUCTS {
+		fmt.Println(valid)
+	}
 	return valid
 
 }
@@ -293,11 +347,13 @@ func checkKing(pos int, board *Board, valid []int) []int {
 	return valid
 }
 
-func checkKingVertical(pos int, board *Board, dy int, valid []int) []int{
+func checkKingVertical(pos int, board *Board, dy int, valid []int) []int {
 	nextPos := pos + 8*dy
-	if !inBoard(nextPos) {return valid}
+	if !inBoard(nextPos) {
+		return valid
+	}
 	nextRow := getRow(nextPos)
-	nextPosL := nextPos -1
+	nextPosL := nextPos - 1
 	nextPosR := nextPos + 1
 	if board.getID(nextPos) != 0 {
 		valid = append(valid, nextPos)
@@ -311,9 +367,11 @@ func checkKingVertical(pos int, board *Board, dy int, valid []int) []int{
 	return valid
 }
 
-func checkKingHorizontal(pos int, board *Board, dx int, valid []int) []int{
+func checkKingHorizontal(pos int, board *Board, dx int, valid []int) []int {
 	nextPos := pos + dx
-	if !inBoard(nextPos) {return valid}
+	if !inBoard(nextPos) {
+		return valid
+	}
 	curRow := getRow(pos)
 	nextRow := getRow(nextPos)
 	if curRow == nextRow && board.getID(nextPos) != 0 {
@@ -321,6 +379,7 @@ func checkKingHorizontal(pos int, board *Board, dx int, valid []int) []int{
 	}
 	return valid
 }
+
 // Helpers
 
 func inBoard(pos int) bool {

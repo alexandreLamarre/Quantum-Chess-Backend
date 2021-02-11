@@ -65,14 +65,14 @@ func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
 			}
 			measureOnAoF(board, entanglements, pieces, AoF)
 			move(board, startSquare, endSquare)
-		} else if piece.inMixedState(){
+		} else if piece.inMixedState() {
 			AoF, err := piece.getAreaOfInfluence(board, endSquare)
 			if err != nil {
 				return err
 			}
 			updateEntanglements(board, entanglements, pieces, piece1, action, AoF)
 			move(board, startSquare, endSquare)
-		} else{ //piece is in a determined state and cant exert its quantum action
+		} else { //piece is in a determined state and cant exert its quantum action
 			move(board, startSquare, endSquare)
 		}
 	}
