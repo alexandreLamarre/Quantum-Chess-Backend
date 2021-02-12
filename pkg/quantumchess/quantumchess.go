@@ -55,6 +55,31 @@ func (piece *Piece) getAction() string {
 	return piece.Action
 }
 
+func (piece *Piece) getStateVector() [][2]float64 {
+	stateVec := make([][2]float64, 0,0)
+
+	for _, cmplx := range piece.State{
+		stateVec = append(stateVec, cmplx)
+	}
+	return stateVec
+}
+
+
+func (piece *Piece) setState(input [][2]float64) error{
+	if len(piece.StateSpace) != len(input){
+		return InvalidSetState(piece.StateSpace)
+	}
+	i := 0
+
+	for _,state := range piece.StateSpace{
+		piece.State[state] = input[i]
+		i++
+	}
+
+	return nil
+}
+
+
 func (piece *Piece) inMixedState() bool {
 	if len(piece.StateSpace) == 1 {
 		return false

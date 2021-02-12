@@ -30,6 +30,10 @@ type InvalidMissingState []string
 // but is actually in a determined state
 type InvalidDeterminedState []string
 
+//InvalidSetState is an error returned when setting a state has too many values
+// returns the state space of the piece whose state we tried to set
+type InvalidSetState []string
+
 func (e InvalidMove) Error() string {
 	return fmt.Sprintf("Illegal move to position %d", e)
 }
@@ -59,4 +63,9 @@ func (e InvalidMissingState) Error() string {
 func (e InvalidDeterminedState) Error() string {
 	s := e[:]
 	return fmt.Sprintf("%v state was passed in as a mixed state", s)
+}
+
+func (e InvalidSetState) Error() string{
+	s:= e[:]
+	return fmt.Sprintf("Tried to set state of %v but failed", s)
 }
