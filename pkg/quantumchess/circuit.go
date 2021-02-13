@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/alexandreLamarre/Quantum-Chess-Backend/pkg/quantum"
 )
+
 //DEBUGCIRCUIT toggles debug messages for circuits
 var DEBUGCIRCUIT = false
 
@@ -11,17 +12,25 @@ var DEBUGCIRCUIT = false
 // returns the state cast to the real part of the QuantumState obtained
 func ApplyCircuit(action string, qbitSize int, state [][2]float64) [][2]float64 {
 	complexState := parseFloat64ArrayToComplex128(state)
-	if DEBUGCIRCUIT {fmt.Println(complexState)}
+	if DEBUGCIRCUIT {
+		fmt.Println(complexState)
+	}
 	gate, err := parseCircuit(action, qbitSize)
-	if DEBUGCIRCUIT {fmt.Println(gate)}
+	if DEBUGCIRCUIT {
+		fmt.Println(gate)
+	}
 	if err {
 		fmt.Println(err)
 	}
 	cs := quantum.MakeState(qbitSize)
 	cs.SetState(complexState)
-	if DEBUGCIRCUIT {fmt.Println(cs)}
+	if DEBUGCIRCUIT {
+		fmt.Println(cs)
+	}
 	cs.ApplyGate(gate)
-	if DEBUGCIRCUIT {fmt.Println(cs)}
+	if DEBUGCIRCUIT {
+		fmt.Println(cs)
+	}
 	return parseComplex128ArrayToFloat64(cs.Amplitudes)
 
 }
@@ -29,13 +38,15 @@ func ApplyCircuit(action string, qbitSize int, state [][2]float64) [][2]float64 
 func parseCircuit(action string, qbitSize int) (quantum.Gate, bool) {
 	if action == "Hadamard" {
 		return quantum.Hadamard(qbitSize)
-
 	} else if action == "PauliX" {
 		return quantum.PauliX(qbitSize)
-	} else {
+	} else if action == "PauliZ" {
 		return quantum.PauliZ(qbitSize)
+	} else if action == "SqrtNOT" {
+		return quantum.SqrtNOT(qbitSize)
+	} else {
+		return quantum.PauliY(qbitSize)
 	}
-
 }
 
 func parseFloat64ArrayToComplex128(state [][2]float64) []complex128 {

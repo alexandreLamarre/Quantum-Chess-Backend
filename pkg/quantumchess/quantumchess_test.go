@@ -15,23 +15,7 @@ func TestApplyMove(t *testing.T) {
 	entanglements := &Entanglements{}
 	pieces := &Pieces{}
 
-	setupInitialQuantumChess(t, board, entanglements, pieces)
-}
-
-func setupInitialQuantumChess(t *testing.T, board *Board, entanglements *Entanglements, pieces *Pieces){
-	positions := [64]int{
-		1,2,3,4,5,6,7, 8,
-		9,10,11,12,13,14,15, 16,
-		0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,
-		17,18,19,20,21,22,23,24,
-		25,26,27,28,29,30,31,32,
-	}
-	board.Positions = positions[:]
-
-	
+	SetupInitialQuantumChess(board, entanglements, pieces)
 }
 
 //TestAllInfluence tests the areas of influence of Q-pieces.
@@ -40,11 +24,12 @@ func TestAllInfluence(t *testing.T) {
 	debug = false
 	DEBUG_QUANTUM_CHESS_STRUCTS = false
 	DEBUGAPPLYMOVE = false
-	testBishopAof(t)
-	testKnightAoF(t)
-	testRookAoF(t)
-	testQueenAoF(t)
-	testKingAoF(t)
+	pieces := &Pieces{}
+	testBishopAof(t, pieces)
+	testKnightAoF(t, pieces)
+	testRookAoF(t, pieces)
+	//testQueenAoF(t, pieces) //TODO create a working test board for queen
+	testKingAoF(t, pieces)
 }
 
 // TestNonMoveHelpers tests the helpers that manipulate vectors, kronecker products and circuits.
@@ -58,45 +43,45 @@ func TestNonMoveHelpers(t *testing.T) {
 	vec4 := [2]float64{0.0, 0.7777}
 	vec5 := [2]float64{0.0, 1.0}
 
-	s1:= [][2]float64{vec1, vec2}
-	s2:= [][2]float64{vec3, vec4}
-	s3:= [][2]float64{vec5, vec1}
+	s1 := [][2]float64{vec1, vec2}
+	s2 := [][2]float64{vec3, vec4}
+	s3 := [][2]float64{vec5, vec1}
 	//s4:= [][2]float64{vec2, vec1}
 
 	testComplexMultiplication(t, vec1, vec2, vec3, vec4, vec5)
 	testModulus(t, vec1, vec3, vec5)
-	k:= testKroneckerProduct(t, s1, s2, s3)
+	k := testKroneckerProduct(t, s1, s2, s3)
 
 	direc1 := [][2]float64{{1.0, 0.0}, {0.0, 0.0}}
 	testApplyCircuit(t, direc1, k)
 
 }
 
-func testApplyCircuit(t *testing.T, s1, s2 [][2]float64){
+func testApplyCircuit(t *testing.T, s1, s2 [][2]float64) {
 
 	hadamardIdentity := ApplyCircuit("Hadamard", int(math.Log2(float64(len(s1)))), s1)
 
-	res := [][2]float64{ {1/math.Sqrt(2), 0.0}, {1/math.Sqrt(2), 0.0}}
+	res := [][2]float64{{1 / math.Sqrt(2), 0.0}, {1 / math.Sqrt(2), 0.0}}
 
 	if len(hadamardIdentity) != len(res) {
 		t.Errorf("Apply Gate returned the wrong size state. Expected %d. Got: %d",
-																len(res), len(hadamardIdentity))
+			len(res), len(hadamardIdentity))
 	}
 
-	for i, v := range hadamardIdentity{
-		if ! approxEqual(res[i], v){
+	for i, v := range hadamardIdentity {
+		if !approxEqual(res[i], v) {
 			t.Errorf("Apply gate values mismatch. Expected, %v. Got: %v ", res[i], v)
 		}
 	}
-	c:= 0.5* 1/math.Sqrt(2)
+	c := 0.5 * 1 / math.Sqrt(2)
 
-	res1 := [][2]float64{{c*-16.31, c*11.43}, {c*-1.62, c*-8.96}, {c*-10.09, c*13.76}, {c*-3.17, c*6.63},
-							{c*-5.95, c*3.81}, {c*-0.022, c*2.988}, {c*-2.84, c*4.58}, {c*-1.67, c*-2.21}}
+	res1 := [][2]float64{{c * -16.31, c * 11.43}, {c * -1.62, c * -8.96}, {c * -10.09, c * 13.76}, {c * -3.17, c * 6.63},
+		{c * -5.95, c * 3.81}, {c * -0.022, c * 2.988}, {c * -2.84, c * 4.58}, {c * -1.67, c * -2.21}}
 
 	fmt.Println(len(s2))
 	hadamardNonIdentity := ApplyCircuit("Hadamard", int(math.Log2(float64(len(s2)))), s2)
 	fmt.Println(len(hadamardNonIdentity))
-	if len(hadamardNonIdentity) != len(res1){
+	if len(hadamardNonIdentity) != len(res1) {
 		t.Errorf("Apply Gate returned the wrong size state. Expected %d. Got: %d",
 			len(res1), len(hadamardNonIdentity))
 	}
@@ -109,82 +94,79 @@ func testApplyCircuit(t *testing.T, s1, s2 [][2]float64){
 
 	states := unpackStatesFromEntangledState(hadamardNonIdentity)
 	fmt.Println(len(states))
-	for _, v := range states{
+	for _, v := range states {
 		fmt.Println(v)
 	}
 
 	//TODO add test for pauliX, pauliY, pauliZ, SqrtNOT
 
-
-
-
 }
 
 func testComplexMultiplication(t *testing.T, v1 [2]float64, v2 [2]float64,
-	v3 [2]float64, v4 [2]float64, v5 [2]float64){
+	v3 [2]float64, v4 [2]float64, v5 [2]float64) {
 
 	res1 := [2]float64{0.0, 1.0}
-	if !approxEqual(res1, cmplxMult(v1, v2)){
-		t.Errorf("expected %v and %v to be approximately equal", res1, cmplxMult(v1,v2))
+	if !approxEqual(res1, cmplxMult(v1, v2)) {
+		t.Errorf("expected %v and %v to be approximately equal", res1, cmplxMult(v1, v2))
 	}
 
 	res2 := [2]float64{1.6, 5.2}
-	if !approxEqual(res2, cmplxMult(v1,v3)){
-		t.Errorf("expected %v and %v to be approximately equal", res2, cmplxMult(v1,v3))
+	if !approxEqual(res2, cmplxMult(v1, v3)) {
+		t.Errorf("expected %v and %v to be approximately equal", res2, cmplxMult(v1, v3))
 	}
 
-	res3:= [2]float64{-1.39, 2.64}
-	if !approxEqual(res3, cmplxMult(v3,v4)){
-		t.Errorf("expected %v and %v to be approximately equal", res3, cmplxMult(v3,v4))
+	res3 := [2]float64{-1.39, 2.64}
+	if !approxEqual(res3, cmplxMult(v3, v4)) {
+		t.Errorf("expected %v and %v to be approximately equal", res3, cmplxMult(v3, v4))
 	}
 
-	res4:= [2]float64{-0.7777, 0.0}
-	if !approxEqual(res4, cmplxMult(v4,v5)){
-		t.Errorf("expected %v and %v to be approximately equal", res3, cmplxMult(v3,v4))
+	res4 := [2]float64{-0.7777, 0.0}
+	if !approxEqual(res4, cmplxMult(v4, v5)) {
+		t.Errorf("expected %v and %v to be approximately equal", res3, cmplxMult(v3, v4))
 	}
 }
 
-func testModulus(t *testing.T, v1, v2, v3 [2]float64){
+func testModulus(t *testing.T, v1, v2, v3 [2]float64) {
 	mod1 := math.Sqrt(2)
-	if !approxEqualFloat(mod1, modulus(v1)){
+	if !approxEqualFloat(mod1, modulus(v1)) {
 		t.Errorf("expected modulus of %v, to be %v, got %v", v1, mod1, modulus(v1))
 	}
 
 	mod2 := 3.84
-	if !approxEqualFloat(mod2, modulus(v2)){
+	if !approxEqualFloat(mod2, modulus(v2)) {
 		t.Errorf("expected modulus of %v, to be %v, got %v", v2, mod2, modulus(v2))
 	}
 
 	mod3 := 1.0
-	if !approxEqualFloat(mod3, modulus(v3)){
+	if !approxEqualFloat(mod3, modulus(v3)) {
 		t.Errorf("expected modulus of %v, to be %v, got %v", v3, mod3, modulus(v3))
 	}
 }
 
-func testKroneckerProduct(t *testing.T, v1, v2, v3 [][2]float64) [][2]float64{
+func testKroneckerProduct(t *testing.T, v1, v2, v3 [][2]float64) [][2]float64 {
 	kProd := kroneckerVectorProduct(v1, v2)
-	res := [][2]float64{{1.6, 5.2}, {-0.7777, 0.7777}, {0.8, 2.6}, {-0.7777/2, 0.7777/2}}
+	res := [][2]float64{{1.6, 5.2}, {-0.7777, 0.7777}, {0.8, 2.6}, {-0.7777 / 2, 0.7777 / 2}}
 
 	if len(kProd) != len(res) {
 		t.Errorf("Expected kronecker product to be of length %d, got %d", len(res), len(kProd))
 	}
 
 	for i, v := range kProd {
-		if !approxEqual(res[i], v){
+		if !approxEqual(res[i], v) {
 			t.Errorf("Krocker product values mismatch. Expected, %v. Got: %v ", res[i], v)
 		}
 	}
 
 	kProd1 := kroneckerVectorProduct(kProd, v3)
-	res1 := [][2]float64{{-5.2, 1.6}, {-5.2+1.6, 1.6+5.2}, {-0.7777, -0.7777}, {-0.7777*2, 0.0},
-							{-2.6, 0.8}, {-2.6+0.8, 3.4}, {-0.38885, -0.38885}, {-0.38885*2, 0.0} }
+	res1 := [][2]float64{{-5.2, 1.6}, {-5.2 + 1.6, 1.6 + 5.2}, {-0.7777, -0.7777}, {-0.7777 * 2, 0.0},
+		{-2.6, 0.8}, {-2.6 + 0.8, 3.4}, {-0.38885, -0.38885}, {-0.38885 * 2, 0.0}}
 
-	if len(kProd1) != len(res1){
+	if len(kProd1) != len(res1) {
 		t.Errorf("Expected kronecker product to be of length %d, got %d", len(res1), len(kProd1))
 	}
 
 	for i, v := range kProd1 {
-		if !approxEqual(res1[i], v){
+		if !approxEqual(res1[i], v) {
 			t.Errorf("Krocker product values mismatch at index %d. Expected, %v. Got: %v ", i, res1[i], v)
 		}
 	}
@@ -192,13 +174,13 @@ func testKroneckerProduct(t *testing.T, v1, v2, v3 [][2]float64) [][2]float64{
 }
 
 //helper to determine if vector function are correct within rounding errors
-func approxEqual(v1 [2]float64, v2 [2]float64) bool{
-	return v1[0] < v2[0]+0.01 && v1[0] > v2[0] -0.01 &&
-			v1[1] < v2[1] +0.01 && v1[1] > v2[1] -0.01
+func approxEqual(v1 [2]float64, v2 [2]float64) bool {
+	return v1[0] < v2[0]+0.01 && v1[0] > v2[0]-0.01 &&
+		v1[1] < v2[1]+0.01 && v1[1] > v2[1]-0.01
 }
 
-func approxEqualFloat(a,b float64) bool{
-	return a < b + 0.01 && a > b-0.01
+func approxEqualFloat(a, b float64) bool {
+	return a < b+0.01 && a > b-0.01
 }
 
 func createBoard(t *testing.T, board *Board, positions []int) {
@@ -240,8 +222,8 @@ func createPiece(t *testing.T, piece *Piece, action string, color int, initstate
 	piece.Moved = moved
 }
 
-func testAoF(t *testing.T, piece *Piece, pos int, board *Board, expected map[int]bool) {
-	AoF, err := piece.getAreaOfInfluence(board, pos)
+func testAoF(t *testing.T, piece *Piece, pos int, board *Board, expected map[int]bool, pieces *Pieces) {
+	AoF, err := piece.getAreaOfInfluence(board, pos, pieces)
 	if err != nil {
 		t.Logf("AoF error")
 		log.Fatal(err)
@@ -265,7 +247,7 @@ func testAoF(t *testing.T, piece *Piece, pos int, board *Board, expected map[int
 	}
 }
 
-func testBishopAof(t *testing.T) {
+func testBishopAof(t *testing.T, pieces *Pieces) {
 	positions := [64]int{
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 2, 0, 0,
@@ -294,7 +276,7 @@ func testBishopAof(t *testing.T) {
 		27: true,
 		29: true,
 	}
-	testAoF(t, qBishop, 20, board, res)
+	testAoF(t, qBishop, 20, board, res, pieces)
 
 	positions1 := [64]int{
 		0, 0, 2, 0, 0, 0, 3, 0,
@@ -326,7 +308,7 @@ func testBishopAof(t *testing.T) {
 		38: true,
 		48: true,
 	}
-	testAoF(t, qBishop1, 20, board1, res1)
+	testAoF(t, qBishop1, 20, board1, res1, pieces)
 
 	positions2 := [64]int{
 		0, 0, 2, 0, 0, 0, 3, 0,
@@ -358,7 +340,7 @@ func testBishopAof(t *testing.T) {
 		38: true,
 		48: true,
 	}
-	testAoF(t, qBishop2, 20, board2, res2)
+	testAoF(t, qBishop2, 20, board2, res2, pieces)
 
 	positions3 := [64]int{
 		2, 2, 2, 2, 0, 2, 2, 2,
@@ -384,10 +366,10 @@ func testBishopAof(t *testing.T) {
 	createPiece(t, qBishop3, "Hadamard", 0,
 		bishopInitialState3, stateSpace3, bishopInitialState3, false)
 	res3 := map[int]bool{}
-	testAoF(t, qBishop3, 32, board3, res3)
+	testAoF(t, qBishop3, 32, board3, res3, pieces)
 }
 
-func testKnightAoF(t *testing.T) {
+func testKnightAoF(t *testing.T, pieces *Pieces) {
 	positions := [64]int{
 		0, 0, 0, 1, 0, 2, 0, 0,
 		0, 0, 3, 0, 0, 0, 6, 0,
@@ -422,7 +404,7 @@ func testKnightAoF(t *testing.T) {
 		35: true,
 		37: true,
 	}
-	testAoF(t, qKnight, 20, board, res)
+	testAoF(t, qKnight, 20, board, res, pieces)
 
 	positions1 := [64]int{
 		0, 0, 2, 0, 0, 2, 0, 0,
@@ -452,7 +434,7 @@ func testKnightAoF(t *testing.T) {
 		18: true,
 		25: true,
 	}
-	testAoF(t, qKnight1, 8, board1, res1)
+	testAoF(t, qKnight1, 8, board1, res1, pieces)
 
 	positions2 := [64]int{
 		2, 2, 2, 0, 2, 0, 2, 2,
@@ -478,10 +460,10 @@ func testKnightAoF(t *testing.T) {
 	createPiece(t, qKnight2, "Hadamard", 1,
 		bishopInitialState2, stateSpace2, bishopInitialState2, false)
 	res2 := map[int]bool{}
-	testAoF(t, qKnight, 20, board2, res2)
+	testAoF(t, qKnight, 20, board2, res2, pieces)
 }
 
-func testRookAoF(t *testing.T) {
+func testRookAoF(t *testing.T, pieces *Pieces) {
 	positions := [64]int{
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 2, 0, 6, 0,
@@ -511,7 +493,7 @@ func testRookAoF(t *testing.T) {
 		23: true,
 		52: true,
 	}
-	testAoF(t, qRook, 20, board, res)
+	testAoF(t, qRook, 20, board, res, pieces)
 
 	positions1 := [64]int{
 		2, 2, 2, 2, 0, 2, 2, 2,
@@ -537,7 +519,7 @@ func testRookAoF(t *testing.T) {
 	createPiece(t, qRook1, "Measurement", 1,
 		bishopInitialState1, stateSpace1, bishopInitialState1, false)
 	res1 := map[int]bool{}
-	testAoF(t, qRook1, 20, board1, res1)
+	testAoF(t, qRook1, 20, board1, res1, pieces)
 
 	positions2 := [64]int{
 		2, 2, 2, 2, 0, 2, 2, 2,
@@ -566,10 +548,10 @@ func testRookAoF(t *testing.T) {
 		8:  true,
 		24: true,
 	}
-	testAoF(t, qRook2, 16, board2, res2)
+	testAoF(t, qRook2, 16, board2, res2, pieces)
 }
 
-func testQueenAoF(t *testing.T) {
+func testQueenAoF(t *testing.T, pieces *Pieces) {
 	positions := [64]int{
 		0, 0, 2, 0, 2, 0, 0, 0,
 		0, 0, 0, 0, 0, 2, 0, 0,
@@ -603,7 +585,7 @@ func testQueenAoF(t *testing.T) {
 		48: true,
 		52: true,
 	}
-	testAoF(t, qQueen, 20, board, res)
+	testAoF(t, qQueen, 20, board, res, pieces)
 
 	positions1 := [64]int{
 		2, 2, 0, 2, 0, 2, 0, 2,
@@ -629,10 +611,10 @@ func testQueenAoF(t *testing.T) {
 	createPiece(t, qQueen1, "Measurement", 1,
 		queenInitialState1, stateSpace1, queenInitialState1, false)
 	res1 := map[int]bool{}
-	testAoF(t, qQueen, 20, board1, res1)
+	testAoF(t, qQueen, 20, board1, res1, pieces)
 }
 
-func testKingAoF(t *testing.T) {
+func testKingAoF(t *testing.T, pieces *Pieces) {
 	positions := [64]int{
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 2, 2, 2, 0, 0,
@@ -666,7 +648,7 @@ func testKingAoF(t *testing.T) {
 		28: true,
 		29: true,
 	}
-	testAoF(t, qKing, 20, board, res)
+	testAoF(t, qKing, 20, board, res, pieces)
 
 	positions1 := [64]int{
 		2, 2, 2, 2, 2, 0, 0, 0,
@@ -692,7 +674,7 @@ func testKingAoF(t *testing.T) {
 	createPiece(t, qKing1, "Measurement", 1,
 		kingInitialState1, stateSpace1, kingInitialState1, false)
 	res1 := map[int]bool{}
-	testAoF(t, qKing, 20, board1, res1)
+	testAoF(t, qKing, 20, board1, res1, pieces)
 
 	positions2 := [64]int{
 		5, 2, 2, 2, 2, 0, 0, 0,
@@ -722,5 +704,5 @@ func testKingAoF(t *testing.T) {
 		8: true,
 		9: true,
 	}
-	testAoF(t, qKing, 0, board2, res2)
+	testAoF(t, qKing, 0, board2, res2, pieces)
 }

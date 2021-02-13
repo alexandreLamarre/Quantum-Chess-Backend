@@ -60,15 +60,15 @@ func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
 		}
 		if action == "None" {
 			move(board, startSquare, endSquare) //move a piece as normal
-		} else if action == "Measurement" && piece.inMixedState () {
-			AoF, err := piece.getAreaOfInfluence(board, endSquare)
+		} else if action == "Measurement" && piece.inMixedState() {
+			AoF, err := piece.getAreaOfInfluence(board, endSquare, pieces)
 			if err != nil {
 				return err
 			}
 			measureOnAoF(board, entanglements, pieces, AoF)
 			move(board, startSquare, endSquare)
 		} else if piece.inMixedState() {
-			AoF, err := piece.getAreaOfInfluence(board, endSquare)
+			AoF, err := piece.getAreaOfInfluence(board, endSquare, pieces)
 			if err != nil {
 				return err
 			}
@@ -123,36 +123,43 @@ func measure2(pieces *Pieces, entanglements *Entanglements, piece1 int, piece2 i
 //measure1 measures the states of all pieces entangled to piece
 func measure(pieces *Pieces, entanglements *Entanglements, piece int) {
 
-	for _, v := range entanglements.List[piece].Elements{
-		if len(pieces.List[piece].StateSpace) == 1 {continue}
+	for _, v := range entanglements.List[piece].Elements {
+		if len(pieces.List[piece].StateSpace) == 1 {
+			continue
+		}
 		randInteger := rand.Float64()
 		cur := 0.0
 		maxProb := ""
 		selected := ""
-		for state, c := range pieces.List[v].State{
+		for state, c := range pieces.List[v].State {
 			pr := modulus(c)
-			if pr > cur{
+			if pr > cur {
 				maxProb = state
 			}
 			cur += pr
-			if randInteger < cur{
+			if randInteger < cur {
 				selected = state
 				break
 			}
 		}
 		//if a rounding error occurs, it selects the max probability result
-		if selected == ""{ selected = maxProb}
+		if selected == "" {
+			selected = maxProb
+		}
 
-		for state := range pieces.List[v].State{
-			if state == selected {pieces.List[v].State[state] = [2]float64{1.0, 0.0}
-			} else{ pieces.List[v].State[state] = [2]float64{0.0, 0.0}}
+		for state := range pieces.List[v].State {
+			if state == selected {
+				pieces.List[v].State[state] = [2]float64{1.0, 0.0}
+			} else {
+				pieces.List[v].State[state] = [2]float64{0.0, 0.0}
+			}
 		}
 		entanglements.List[piece] = nil //reset their entanglements
 	}
 }
 
-func modulus(cmplx [2]float64) float64{
-	return math.Sqrt(math.Pow(cmplx[0], 2) + math.Pow(cmplx[1],2))
+func modulus(cmplx [2]float64) float64 {
+	return math.Sqrt(math.Pow(cmplx[0], 2) + math.Pow(cmplx[1], 2))
 }
 
 //processCapture removes the piece being captured from board then moves the piece who captured
@@ -200,37 +207,36 @@ func updateEntanglements(board *Board, entanglements *Entanglements, pieces *Pie
 	fmt.Println(kroneckerProductStack, idStack)
 	// append to Entangled elements recursively while checking not to add duplicates
 	for id := range aof {
-		if !pieces.List[id].inMixedState(){
+		if !pieces.List[id].inMixedState() {
 			//DO NOT ADD PIECE TO ENTANGLEMENTS, Apply the gate as normal
 			//TODO: Apply gate to size 1 state vector of piece with id id
 			if len(pieces.List[id].StateSpace) != 1 {
 				newState := ApplyCircuit(action, 1, pieces.List[id].getStateVector())
-				i:= 0
-				for state,_ := range pieces.List[id].State{
+				i := 0
+				for state, _ := range pieces.List[id].State {
 					pieces.List[id].State[state] = newState[i]
 					i++
 				}
 			}
 
-
-		} else{
+		} else {
 			//ADD PIECE TO ENTANGLEMENTS THEN APPLY THE GATE
 			//els := entanglements.List[pieceId].Elements
-			if !checkEntangledWith(entanglements, pieceId, id){
+			if !checkEntangledWith(entanglements, pieceId, id) {
 
-				if entanglements.List[id] != nil{
-					for _, el := range entanglements.List[id].Elements{
+				if entanglements.List[id] != nil {
+					for _, el := range entanglements.List[id].Elements {
 						entanglements.List[pieceId].Elements = append(
 							entanglements.List[pieceId].Elements, el)
 						idStack = append(idStack, el)
 					}
 					kroneckerProductStack = append(kroneckerProductStack,
-												entanglements.List[pieceId].State)
-				} else{
+						entanglements.List[pieceId].State)
+				} else {
 					entanglements.List[pieceId].Elements = append(
 						entanglements.List[pieceId].Elements, id)
 					kroneckerProductStack = append(kroneckerProductStack, pieces.List[id].getStateVector())
-					idStack = append(idStack , id)
+					idStack = append(idStack, id)
 				}
 			}
 
@@ -245,56 +251,58 @@ func updateEntanglements(board *Board, entanglements *Entanglements, pieces *Pie
 
 	//Too many entanglements were added
 	if len(entanglements.List[pieceId].Elements) >= 8 { //unstable quantum system collapses on itself (returns early)
-		for _, id := range entanglements.List[pieceId].Elements{
+		for _, id := range entanglements.List[pieceId].Elements {
 			measure(pieces, entanglements, id)
 		}
 		return nil
 	}
 
 	var finalState [][2]float64
-	for _, vector := range kroneckerProductStack{
-		entanglements.List[pieceId].State = kroneckerVectorProduct(entanglements.List[pieceId].State, vector )
+	for _, vector := range kroneckerProductStack {
+		entanglements.List[pieceId].State = kroneckerVectorProduct(entanglements.List[pieceId].State, vector)
 	}
 
 	//TODO: apply quantum circuit to the kronecker Product
 	qbitSize := int(math.Log2(float64(len(entanglements.List[pieceId].Elements))))
 	// finally apply quantum action to entangled
 	finalState = ApplyCircuit(action, qbitSize, entanglements.List[pieceId].State)
-	if DEBUGAPPLYMOVE {fmt.Println("final entangled state", finalState)}
+	if DEBUGAPPLYMOVE {
+		fmt.Println("final entangled state", finalState)
+	}
 	// update all entanglements [ids added] to the same value as entanglements[pieceID]
 
 	states := unpackStatesFromEntangledState(finalState)
-	if DEBUGAPPLYMOVE{fmt.Println(states)}
+	if DEBUGAPPLYMOVE {
+		fmt.Println(states)
+	}
 
 	//TODO: update each entanglement with the new state vector
 	//TODO: set each pieces state based on its position in elements/Idstack to corresponding sum of entanglement state
-	for i, state := range states{
+	for i, state := range states {
 		id := entanglements.List[pieceId].Elements[i]
 		err := pieces.List[id].setState(state)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 		entanglements.List[id] = entanglements.List[pieceId]
 	}
 
-
 	return nil
 }
 
-
-func unpackStatesFromEntangledState(allState [][2]float64) [][][2]float64{
+func unpackStatesFromEntangledState(allState [][2]float64) [][][2]float64 {
 	size := len(allState)
-	res:= make([][][2]float64, 0, 0 )
-	for size/2 >= 1{
+	res := make([][][2]float64, 0, 0)
+	for size/2 >= 1 {
 		value1 := [2]float64{0.0, 0.0}
 		value2 := [2]float64{0.0, 0.0}
 		i := 0
 		flipped := false
-		for _, v := range allState{
-			if !flipped{
+		for _, v := range allState {
+			if !flipped {
 				value1[0] += v[0]
 				value1[1] += v[1]
-			} else{
+			} else {
 				value2[0] += v[0]
 				value2[1] += v[1]
 			}
@@ -305,22 +313,22 @@ func unpackStatesFromEntangledState(allState [][2]float64) [][][2]float64{
 			}
 		}
 		res = append(res, [][2]float64{value1, value2})
-		size = size/2
+		size = size / 2
 	}
 	return res
 }
 
-func kroneckerVectorProduct(v1 [][2]float64, v2[][2]float64 ) [][2]float64{
-	res:= make([][2]float64, 0, len(v1)*len(v2))
+func kroneckerVectorProduct(v1 [][2]float64, v2 [][2]float64) [][2]float64 {
+	res := make([][2]float64, 0, len(v1)*len(v2))
 	fmt.Println()
 	// TODO: do kronecker product of two vectors
-	for _,a1 := range v1{
-		for _,a2 := range v2{
-			if DEBUGAPPLYMOVE{
+	for _, a1 := range v1 {
+		for _, a2 := range v2 {
+			if DEBUGAPPLYMOVE {
 				//fmt.Println("complex coefficients",a1, a2)
-				fmt.Println("result:", cmplxMult(a1,a2))
+				fmt.Println("result:", cmplxMult(a1, a2))
 			}
-			res = append(res, cmplxMult(a1,a2) )
+			res = append(res, cmplxMult(a1, a2))
 
 		}
 	}
@@ -328,22 +336,22 @@ func kroneckerVectorProduct(v1 [][2]float64, v2[][2]float64 ) [][2]float64{
 	return res
 }
 
-func cmplxMult(v1 [2]float64, v2 [2]float64) [2]float64{
-	a:= v1[0]
+func cmplxMult(v1 [2]float64, v2 [2]float64) [2]float64 {
+	a := v1[0]
 	b := v1[1]
-	c:= v2[0]
-	d:= v2[1]
-	return [2]float64{a*c -b*d, b*c + a*d}
+	c := v2[0]
+	d := v2[1]
+	return [2]float64{a*c - b*d, b*c + a*d}
 }
 
-
 func checkEntangledWith(entanglements *Entanglements, pieceId int, id int) bool {
-	for _, sid := range entanglements.List[pieceId].Elements{
-		if id == sid {return true}
+	for _, sid := range entanglements.List[pieceId].Elements {
+		if id == sid {
+			return true
+		}
 	}
 	return false
 }
-
 
 // find function return true if el is in arr.
 func find(arr []int, el int) bool {

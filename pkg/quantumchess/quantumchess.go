@@ -47,6 +47,178 @@ type Piece struct {
 	Moved        bool
 }
 
+//SetupInitialQuantumChess sets up the initial quantum chess board.
+func SetupInitialQuantumChess(board *Board, entanglements *Entanglements, pieces *Pieces) {
+	positions := [64]int{
+		1, 2, 3, 4, 5, 6, 7, 8,
+		9, 10, 11, 12, 13, 14, 15, 16,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		17, 18, 19, 20, 21, 22, 23, 24,
+		25, 26, 27, 28, 29, 30, 31, 32,
+	}
+	board.Positions = positions[:]
+
+	//Rooks
+	pieces.List = make(map[int]*Piece)
+	qRookWhite := __createMixedPiece("Rook", "Pawn",
+		true, 0, "Measurement")
+	pieces.List[25] = qRookWhite
+	qRookWhite2 := __createMixedPiece("Rook", "Pawn",
+		true, 0, "Measurement")
+	pieces.List[32] = qRookWhite2
+
+	qRookBlack := __createMixedPiece("Rook", "Pawn",
+		true, 1, "Measurement")
+	pieces.List[1] = qRookBlack
+	qRookBlack2 := __createMixedPiece("Rook", "Pawn",
+		true, 1, "Measurement")
+	pieces.List[8] = qRookBlack2
+
+	qKnightWhite := __createMixedPiece("Knight", "Pawn",
+		true, 0, "PauliX")
+
+	qKnightWhite2 := __createMixedPiece("Knight", "Pawn",
+		true, 0, "PauliX")
+	pieces.List[26] = qKnightWhite
+	pieces.List[31] = qKnightWhite2
+
+	qKnightBlack := __createMixedPiece("Knight", "Pawn",
+		true, 1, "PauliX")
+
+	qKnightBlack2 := __createMixedPiece("Knight", "Pawn",
+		true, 1, "PauliX")
+	pieces.List[2] = qKnightBlack
+	pieces.List[7] = qKnightBlack2
+
+	qBishopWhite := __createMixedPiece("Bishop", "Pawn",
+		true, 0, "SqrtNOT")
+	qBishopWhite2 := __createMixedPiece("Bishop", "Pawn",
+		true, 0, "SqrtNOT")
+	pieces.List[27] = qBishopWhite
+	pieces.List[30] = qBishopWhite2
+
+	qBishopBlack := __createMixedPiece("Bishop", "Pawn",
+		true, 1, "SqrtNOT")
+	qBishopBlack2 := __createMixedPiece("Bishop", "Pawn",
+		true, 1, "SqrtNOT")
+	pieces.List[3] = qBishopBlack
+	pieces.List[6] = qBishopBlack2
+
+	qQueenWhite := __createMixedPiece("Queen", "Pawn",
+		true, 0, "Hadamard")
+	pieces.List[28] = qQueenWhite
+	qQueenBlack := __createMixedPiece("Queen", "Pawn",
+		true, 1, "Hadamard")
+	pieces.List[5] = qQueenBlack
+
+	qKingWhite := __createKing(0)
+	pieces.List[29] = qKingWhite
+	qKingBlack := __createKing(1)
+	pieces.List[4] = qKingBlack
+
+	qPawnRookWhite := __createMixedPiece("Pawn", "Rook", false, 0,
+		"PauliZ")
+	qPawnRookWhite2 := __createMixedPiece("Pawn", "Rook", false, 0,
+		"PauliZ")
+
+	pieces.List[17] = qPawnRookWhite
+	pieces.List[24] = qPawnRookWhite2
+
+	qPawnRookBlack := __createMixedPiece("Pawn", "Rook", false, 1,
+		"PauliZ")
+	qPawnRookBlack2 := __createMixedPiece("Pawn", "Rook", false, 1,
+		"PauliZ")
+
+	pieces.List[9] = qPawnRookBlack
+	pieces.List[16] = qPawnRookBlack2
+
+	qPawnKnightWhite := __createMixedPiece("Pawn", "Knight", false, 0,
+		"PauliZ")
+	qPawnKnightWhite2 := __createMixedPiece("Pawn", "Knight", false, 0,
+		"PauliZ")
+
+	pieces.List[18] = qPawnKnightWhite
+	pieces.List[23] = qPawnKnightWhite2
+
+	qPawnKnightBlack := __createMixedPiece("Pawn", "Knight", false, 1,
+		"PauliZ")
+	qPawnKnightBlack2 := __createMixedPiece("Pawn", "Knight", false, 1,
+		"PauliZ")
+
+	pieces.List[10] = qPawnKnightBlack
+	pieces.List[15] = qPawnKnightBlack2
+
+	qPawnBishopWhite := __createMixedPiece("Pawn", "Bishop", false, 0,
+		"PauliZ")
+	qPawnBishopWhite2 := __createMixedPiece("Pawn", "Bishop", false, 0,
+		"PauliZ")
+
+	pieces.List[19] = qPawnBishopWhite
+	pieces.List[22] = qPawnBishopWhite2
+
+	qPawnBishopBlack := __createMixedPiece("Pawn", "Bishop", false, 1,
+		"PauliZ")
+	qPawnBishopBlack2 := __createMixedPiece("Pawn", "Bishop", false, 1,
+		"PauliZ")
+
+	pieces.List[11] = qPawnBishopBlack
+	pieces.List[14] = qPawnBishopBlack2
+
+	qPawnKingWhite := __createMixedPiece("Pawn", "King", false, 0,
+		"PauliZ")
+	qPawnQueenWhite := __createMixedPiece("Pawn", "Queen", false, 0,
+		"PauliZ")
+
+	pieces.List[21] = qPawnKingWhite
+	pieces.List[20] = qPawnQueenWhite
+
+	qPawnKingBlack := __createMixedPiece("Pawn", "King", false, 1,
+		"PauliZ")
+	qPawnQueenBlack := __createMixedPiece("Pawn", "Queen", false, 1,
+		"PauliZ")
+
+	pieces.List[12] = qPawnKingBlack
+	pieces.List[13] = qPawnQueenBlack
+
+	for i := 1; i < 33; i++ {
+		entanglements.List[i] = nil
+	}
+}
+
+func __copyMap(input map[string][2]float64) map[string][2]float64 {
+	newMap := make(map[string][2]float64)
+
+	for k, v := range input {
+		newMap[k] = v
+	}
+
+	return newMap
+}
+
+func __createMixedPiece(state1 string, state2 string, normal bool, color int,
+	action string) *Piece {
+	var stateVec [][2]float64
+	if normal {
+		stateVec = [][2]float64{{1 / math.Sqrt(2), 0.0}, {1 / math.Sqrt(2), 0.0}}
+	} else {
+		stateVec = [][2]float64{{1.0, 0.0}, {0.0, 0.0}}
+	}
+	ss := []string{state1, state2}
+	is := map[string][2]float64{state1: stateVec[0], state2: stateVec[1]}
+	state := __copyMap(is)
+
+	return &Piece{Action: action, Color: color, InitialState: is,
+		StateSpace: ss, State: state, Moved: false}
+}
+
+func __createKing(color int) *Piece {
+	return &Piece{Action: "None", Color: color, InitialState: map[string][2]float64{"King": {1.0, 0.0}},
+		StateSpace: []string{"King"}, State: map[string][2]float64{"King": {1.0, 0.0}}, Moved: false}
+}
+
 func (board *Board) getID(id int) int {
 	return board.Positions[id]
 }
@@ -56,29 +228,27 @@ func (piece *Piece) getAction() string {
 }
 
 func (piece *Piece) getStateVector() [][2]float64 {
-	stateVec := make([][2]float64, 0,0)
+	stateVec := make([][2]float64, 0, 0)
 
-	for _, cmplx := range piece.State{
+	for _, cmplx := range piece.State {
 		stateVec = append(stateVec, cmplx)
 	}
 	return stateVec
 }
 
-
-func (piece *Piece) setState(input [][2]float64) error{
-	if len(piece.StateSpace) != len(input){
+func (piece *Piece) setState(input [][2]float64) error {
+	if len(piece.StateSpace) != len(input) {
 		return InvalidSetState(piece.StateSpace)
 	}
 	i := 0
 
-	for _,state := range piece.StateSpace{
+	for _, state := range piece.StateSpace {
 		piece.State[state] = input[i]
 		i++
 	}
 
 	return nil
 }
-
 
 func (piece *Piece) inMixedState() bool {
 	if len(piece.StateSpace) == 1 {
@@ -92,14 +262,14 @@ func (piece *Piece) inMixedState() bool {
 	return true
 }
 
-func (piece *Piece) getAreaOfInfluence(board *Board, newPos int) (map[int]bool, error) {
+func (piece *Piece) getAreaOfInfluence(board *Board, newPos int, pieces *Pieces) (map[int]bool, error) {
 	aof := make(map[int]bool)
 	if !piece.inMixedState() {
 		return aof, InvalidDeterminedState(piece.StateSpace)
 	}
 	states, err := piece._getActivatedStates()
 	for _, state := range states {
-		legalTiles := _getPiecesInAoF(state, newPos, piece.Color, board)
+		legalTiles := _getPiecesInAoF(state, newPos, piece.Color, board, pieces)
 		for _, v := range legalTiles {
 			aof[v] = true
 		}
@@ -129,7 +299,7 @@ func (piece *Piece) _getActivatedStates() ([]string, error) {
 	return activatedStates, nil
 }
 
-func _getPiecesInAoF(state string, pos int, color int, board *Board) []int {
+func _getPiecesInAoF(state string, pos int, color int, board *Board, pieces *Pieces) []int {
 	var validSquares []int
 
 	if state == "Pawn" { //when checking this piece is already moved so we dont need to check two squares forward
@@ -156,7 +326,7 @@ func _getPiecesInAoF(state string, pos int, color int, board *Board) []int {
 		if DEBUG_QUANTUM_CHESS_STRUCTS {
 			fmt.Println("Checking Queen moves")
 		}
-		validSquares = checkQueen(pos, board, validSquares)
+		validSquares = checkQueen(pos, board, validSquares, color, pieces)
 	} else if state == "King" {
 		if DEBUG_QUANTUM_CHESS_STRUCTS {
 			fmt.Println("Checking King moves")
@@ -325,7 +495,7 @@ func checkVertical(pos int, board *Board, dy int, valid []int) []int {
 	return checkVertical(nextPos, board, dy, valid)
 }
 
-func checkQueen(pos int, board *Board, valid []int) []int {
+func checkQueen(pos int, board *Board, valid []int, color int, pieces *Pieces) []int {
 	curRow := getRow(pos)
 	valid = checkDiagonal(pos, board, 1, 1, valid)
 	if DEBUG_QUANTUM_CHESS_STRUCTS {
@@ -359,6 +529,13 @@ func checkQueen(pos int, board *Board, valid []int) []int {
 	valid = checkVertical(pos, board, 1, valid)
 	if DEBUG_QUANTUM_CHESS_STRUCTS {
 		fmt.Println(valid)
+	}
+	//check to make sure its only friendly pieces
+	actualValid := make([]int, 0, 0)
+	for _, id := range valid {
+		if pieces.List[id].Color == color {
+			actualValid = append(actualValid, id)
+		}
 	}
 	return valid
 

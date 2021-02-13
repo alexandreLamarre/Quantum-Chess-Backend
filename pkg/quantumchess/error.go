@@ -65,7 +65,7 @@ func (e InvalidDeterminedState) Error() string {
 	return fmt.Sprintf("%v state was passed in as a mixed state", s)
 }
 
-func (e InvalidSetState) Error() string{
-	s:= e[:]
+func (e InvalidSetState) Error() string {
+	s := e[:]
 	return fmt.Sprintf("Tried to set state of %v but failed", s)
 }

@@ -130,6 +130,34 @@ func PauliZ(qbitSize int) (Gate, bool) {
 	return pauliz, false
 }
 
+func SqrtNOT(qbitSize int) (Gate, bool) {
+	size := float64(qbitSize)
+	var sqrtNOT Gate
+	if qbitSize <= 0 {
+		//#TODO: ERROR HANDLING
+		return sqrtNOT, true
+	}
+	var constant = complex(0.5, 0)
+	arraySize := int(math.Pow(2, 2*size))
+	sqrtNOT.matrix = make([]complex128, arraySize, arraySize)
+	basicGate := [4]complex128{complex(1.0, 1.0), complex(1.0, -1.0),
+		complex(1.0, -1.0), complex(1.0, 1.0)}
+	if DEBUG_GATE {
+		fmt.Println(len(sqrtNOT.matrix))
+	}
+
+	c, gate, err := createGate(qbitSize, constant, basicGate[:])
+	if err {
+		//#TODO ERROR HANDLING
+	}
+	sqrtNOT.constant = c
+	for i := 0; i < len(gate); i++ {
+		sqrtNOT.matrix[i] = gate[i]
+	}
+
+	return sqrtNOT, false
+}
+
 func createGate(qbitSize int, c complex128, basicGate []complex128) (complex128, []complex128, bool) {
 	var newGate []complex128 = basicGate[:]
 	var newC complex128 = c
