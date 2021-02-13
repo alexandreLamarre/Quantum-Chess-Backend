@@ -38,7 +38,9 @@ type GamePool struct {
 	Unregister chan *GameClient
 	Clients    map[*GameClient]int // maps to BLACK or WHITE, both cannot be the same obviously
 	Broadcast  chan GameMessage
-	//Timeout chan
+	//Timer channel
+	//Timeout channel
+	//Players [2]string
 	Start bool
 	Over  bool
 }
