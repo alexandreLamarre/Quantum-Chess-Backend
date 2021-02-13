@@ -6,7 +6,7 @@ import (
 )
 
 //DEBUGCIRCUIT toggles debug messages for circuits
-var DEBUGCIRCUIT = false
+var DEBUGCIRCUIT = true
 
 //ApplyCircuit converts an action string to a QuantumGate of size qbitSize to be used on input state
 // returns the state cast to the real part of the QuantumState obtained

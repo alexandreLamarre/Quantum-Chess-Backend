@@ -130,7 +130,7 @@ func decodeBoardFromMessage(message *GameMessage, board *quantumchess.Board,
 					}
 					statesParsed[state] = cmplxParsed
 				}
-				newPiece.InitialState = statesParsed
+				newPiece.State = statesParsed
 			}
 		}
 

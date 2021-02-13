@@ -231,8 +231,8 @@ func (piece *Piece) getAction() string {
 func (piece *Piece) getStateVector() [][2]float64 {
 	stateVec := make([][2]float64, 0, 0)
 
-	for _, cmplx := range piece.State {
-		stateVec = append(stateVec, cmplx)
+	for _, state := range piece.StateSpace {
+		stateVec = append(stateVec, piece.State[state])
 	}
 	return stateVec
 }

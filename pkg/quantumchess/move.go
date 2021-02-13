@@ -229,12 +229,11 @@ func updateEntanglements(board *Board, entanglements *Entanglements, pieces *Pie
 				newState := ApplyCircuit(action, 1, pieces.List[pid].getStateVector())
 				i := 0
 				if DEBUGAPPLYMOVE{fmt.Println("Copying result of quantum circuit to state")}
-				for state, _ := range pieces.List[pid].State {
-					fmt.Println(state)
+				for _, state := range pieces.List[pid].StateSpace {
 					pieces.List[pid].State[state] = newState[i]
 					i++
 				}
-				fmt.Println(pieces.List[pid].State)
+				if DEBUGAPPLYMOVE{fmt.Println("State resulting from quantum action", pieces.List[pid].State)}
 			}
 
 		} else {
