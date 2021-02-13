@@ -16,6 +16,16 @@ func TestApplyMove(t *testing.T) {
 	pieces := &Pieces{}
 
 	SetupInitialQuantumChess(board, entanglements, pieces)
+	for i := 1; i <= 32; i++{
+		fmt.Println("piece:", pieces.List[i])
+	}
+
+
+	err:= ApplyMove(board, entanglements, pieces, 62, 45)
+	if err != nil{
+		t.Logf("All tests passed lol")
+	}
+	fmt.Println(pieces.List[24], pieces.List[20], pieces.List[31])
 }
 
 //TestAllInfluence tests the areas of influence of Q-pieces.

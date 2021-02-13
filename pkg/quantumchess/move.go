@@ -16,7 +16,7 @@ var ACTIONS [7]string = [7]string{"None", "Hadamard", "PauliX", "PauliZ", "Measu
 // and updates its components in place.
 // Returns nil if successful and an appropriate error if the assumptions are not met.
 func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
-	startSquare int, endSquare int) error {
+	startSquare int, endSquare int) (err error) {
 	if DEBUGAPPLYMOVE {
 		fmt.Println("Applying move from ", startSquare, " to ", endSquare)
 	}
@@ -24,12 +24,14 @@ func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
 	// CHECK CAPTURE
 	movedPiece := board.Positions[startSquare]
 	potentialPiece := board.Positions[endSquare]
+	if DEBUGAPPLYMOVE {fmt.Println("Checking capture")}
 	capture, err := checkCapture(pieces, movedPiece, potentialPiece)
 	if err != nil {
 		return err
 	}
 
 	if capture {
+		if DEBUGAPPLYMOVE{ fmt.Println("A capture has occurred")}
 		piece1, piece2 := board.getID(startSquare), board.getID(endSquare)
 		if piece1 == 0 {
 			return InvalidPiece(startSquare)
@@ -38,14 +40,18 @@ func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
 			return InvalidPiece(endSquare)
 		}
 
+		if DEBUGAPPLYMOVE{fmt.Println("Measuring pieces involved in capture")}
 		measure2(pieces, entanglements, piece1, piece2)
+		if DEBUGAPPLYMOVE {fmt.Println("Processing captures...")}
 		err := processCapture(board, entanglements, pieces, endSquare)
 		if err != nil {
 			return err
 		}
-		move(board, startSquare, endSquare)
+		if DEBUGAPPLYMOVE {fmt.Println("Moving")}
+		move(board, pieces, startSquare, endSquare)
 
 	} else { // CHECK OTHER BOARD STATES IF CAPTURE DOES NOT OCCUR
+		if DEBUGAPPLYMOVE{ fmt.Println("A capture has not occured")}
 		piece1 := board.getID(startSquare)
 		if piece1 == 0 {
 			return InvalidPiece(startSquare)
@@ -58,24 +64,33 @@ func ApplyMove(board *Board, entanglements *Entanglements, pieces *Pieces,
 		if !validAction(action) {
 			return InvalidAction(action)
 		}
+		if DEBUGAPPLYMOVE{fmt.Println("parsing actions....", action)}
 		if action == "None" {
-			move(board, startSquare, endSquare) //move a piece as normal
+			if DEBUGAPPLYMOVE{fmt.Println("Moving")}
+			move(board, pieces, startSquare, endSquare) //move a piece as normal
 		} else if action == "Measurement" && piece.inMixedState() {
+			if DEBUGAPPLYMOVE {fmt.Println("Measuring AoF")}
 			AoF, err := piece.getAreaOfInfluence(board, endSquare, pieces)
 			if err != nil {
 				return err
 			}
 			measureOnAoF(board, entanglements, pieces, AoF)
-			move(board, startSquare, endSquare)
+			move(board, pieces, startSquare, endSquare)
 		} else if piece.inMixedState() {
+			if DEBUGAPPLYMOVE{fmt.Println("Update entanglements based on circuits")}
 			AoF, err := piece.getAreaOfInfluence(board, endSquare, pieces)
 			if err != nil {
 				return err
 			}
-			updateEntanglements(board, entanglements, pieces, piece1, action, AoF)
-			move(board, startSquare, endSquare)
+			eErr:= updateEntanglements(board, entanglements, pieces, piece1, action, AoF)
+			if eErr != nil{
+				return err
+			}
+			if DEBUGAPPLYMOVE{fmt.Println("Moving")}
+			move(board, pieces, startSquare, endSquare)
 		} else { //piece is in a determined state and cant exert its quantum action
-			move(board, startSquare, endSquare)
+			if DEBUGAPPLYMOVE {fmt.Println("Determined state piece moving...")}
+			move(board, pieces, startSquare, endSquare)
 		}
 	}
 
@@ -198,54 +213,67 @@ func updateEntanglements(board *Board, entanglements *Entanglements, pieces *Pie
 
 	kroneckerProductStack := make([][][2]float64, 0, 0)
 	idStack := make([]int, 0, 0)
+	entanglements.List[pieceId] = &Entanglement{}
 
-	if entanglements.List[pieceId] == nil {
-		entanglements.List[pieceId].Elements = []int{pieceId}
-		entanglements.List[pieceId].State = pieces.List[pieceId].getStateVector()
-	}
-
-	fmt.Println(kroneckerProductStack, idStack)
 	// append to Entangled elements recursively while checking not to add duplicates
+	if DEBUGAPPLYMOVE{fmt.Println("Checking AoF on...")}
 	for id := range aof {
-		if !pieces.List[id].inMixedState() {
+		pid := board.getID(id)
+		if DEBUGAPPLYMOVE{fmt.Println(pid)}
+		if !pieces.List[pid].inMixedState() {
+			if DEBUGAPPLYMOVE{fmt.Println("Piece found to be in determined state")}
 			//DO NOT ADD PIECE TO ENTANGLEMENTS, Apply the gate as normal
-			//TODO: Apply gate to size 1 state vector of piece with id id
-			if len(pieces.List[id].StateSpace) != 1 {
-				newState := ApplyCircuit(action, 1, pieces.List[id].getStateVector())
+			//TODO: Apply gate to size 1 state vector of piece with id pid
+			if len(pieces.List[pid].StateSpace) != 1 {
+				if DEBUGAPPLYMOVE{fmt.Println("Apply action ", action)}
+				newState := ApplyCircuit(action, 1, pieces.List[pid].getStateVector())
 				i := 0
-				for state, _ := range pieces.List[id].State {
-					pieces.List[id].State[state] = newState[i]
+				if DEBUGAPPLYMOVE{fmt.Println("Copying result of quantum circuit to state")}
+				for state, _ := range pieces.List[pid].State {
+					fmt.Println(state)
+					pieces.List[pid].State[state] = newState[i]
 					i++
 				}
+				fmt.Println(pieces.List[pid].State)
 			}
 
 		} else {
-			//ADD PIECE TO ENTANGLEMENTS THEN APPLY THE GATE
-			//els := entanglements.List[pieceId].Elements
-			if !checkEntangledWith(entanglements, pieceId, id) {
+			if DEBUGAPPLYMOVE {fmt.Println("Piece found to be in mixed state")}
 
-				if entanglements.List[id] != nil {
-					for _, el := range entanglements.List[id].Elements {
-						entanglements.List[pieceId].Elements = append(
-							entanglements.List[pieceId].Elements, el)
+			if !checkEntangledWith(entanglements, pieceId, pid) {
+
+				if DEBUGAPPLYMOVE {fmt.Println("Piece is not already entangled")}
+
+				if entanglements.List[pid] != nil {
+					if DEBUGAPPLYMOVE {fmt.Println("Piece is entangled to a different system")}
+					for _, el := range entanglements.List[pid].Elements {
 						idStack = append(idStack, el)
 					}
 					kroneckerProductStack = append(kroneckerProductStack,
 						entanglements.List[pieceId].State)
 				} else {
-					entanglements.List[pieceId].Elements = append(
-						entanglements.List[pieceId].Elements, id)
-					kroneckerProductStack = append(kroneckerProductStack, pieces.List[id].getStateVector())
-					idStack = append(idStack, id)
+					if DEBUGAPPLYMOVE{fmt.Println("Piece is not entangled to a different system")}
+					kroneckerProductStack = append(kroneckerProductStack, pieces.List[pid].getStateVector())
+					idStack = append(idStack, pid)
 				}
 			}
 
 		}
 	}
+	if DEBUGAPPLYMOVE{
+		fmt.Println("=================")
+		fmt.Println("id stack", idStack)
+		fmt.Println("kronecker product", kroneckerProductStack)
+	}
+
+	for _, id:= range idStack{
+		entanglements.List[pieceId].Elements = append(entanglements.List[pieceId].Elements, id)
+	}
 
 	//No entanglements were added
-	if len(entanglements.List[pieceId].Elements) == 1 {
+	if len(entanglements.List[pieceId].Elements) == 0 || len(entanglements.List[pieceId].Elements) == 1{
 		entanglements.List[pieceId] = nil
+		fmt.Println("No updated entanglements")
 		return nil
 	}
 
@@ -345,6 +373,7 @@ func cmplxMult(v1 [2]float64, v2 [2]float64) [2]float64 {
 }
 
 func checkEntangledWith(entanglements *Entanglements, pieceId int, id int) bool {
+	if entanglements.List[pieceId] == nil{return false}
 	for _, sid := range entanglements.List[pieceId].Elements {
 		if id == sid {
 			return true
@@ -374,8 +403,9 @@ func validAction(a string) bool {
 
 // move moves a piece from startSquare to endSquare, after the rest of processing
 //for the turn is done
-func move(board *Board, startSquare int, endSquare int) {
-	tempPieceId := startSquare
+func move(board *Board, pieces *Pieces, startSquare int, endSquare int) {
+	tempPieceId := board.getID(startSquare)
+	pieces.List[tempPieceId].Moved = true
 	board.Positions[startSquare] = 0
 	board.Positions[endSquare] = tempPieceId
 }

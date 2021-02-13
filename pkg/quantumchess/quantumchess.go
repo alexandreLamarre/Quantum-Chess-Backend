@@ -60,6 +60,7 @@ func SetupInitialQuantumChess(board *Board, entanglements *Entanglements, pieces
 		25, 26, 27, 28, 29, 30, 31, 32,
 	}
 	board.Positions = positions[:]
+	entanglements.List = make(map[int]*Entanglement)
 
 	//Rooks
 	pieces.List = make(map[int]*Piece)
@@ -255,7 +256,7 @@ func (piece *Piece) inMixedState() bool {
 		return false
 	}
 	for _, v := range piece.State {
-		if !nonZero(v) {
+		if v == [2]float64{1.0, 0.0} {
 			return false
 		}
 	}
